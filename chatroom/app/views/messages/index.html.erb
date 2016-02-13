@@ -1,0 +1,28 @@
+<h1>Messages</h1>
+
+<div id="messages-body"></div>
+
+<%= render 'form' %>
+
+<% content_for :js do %>
+<script>
+  var render_message = function(message){
+    var raw = "<b>"+ message.content +"</b><br><i>"+ message.poster +"</i><hr />"
+    $('#messages-body').append(raw);
+  }
+  var get_messages = function(){
+    $('#messages-body').html('')
+    $.get('<%= messages_path(format: :json) %>',function(messages){
+      console.log(messages)
+      $.each(messages,function(i,message){
+        render_message(message);
+      })
+    })
+  }
+  get_messages();
+  notification_center.subscribe(function(notification){
+    console.log('notification_center.listener',notification)
+    render_message(notification.message);
+  })
+</script>
+<% end %>

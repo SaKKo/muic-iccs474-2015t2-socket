@@ -12,5 +12,44 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require turbolinks
 //= require_tree .
+
+function NotificationCenter() {
+  this.handlers = []; // observers
+}
+
+NotificationCenter.prototype = {
+
+  subscribe: function(fn) {
+    this.handlers.push(fn);
+  },
+
+  unsubscribe: function(fn) {
+    this.handlers = this.handlers.filter(
+      function(item) {
+        if (item !== fn) {
+          return item;
+        }
+      }
+    );
+  },
+
+  fire: function(o, thisObj) {
+    var scope = thisObj || window;
+    this.handlers.forEach(function(item) {
+      item.call(scope, o);
+    });
+  }
+}
+
+var notification_center = new NotificationCenter();
+
+var messageQueueConsoleLogger = function() {
+  var socket_message = window.realtime.messageQueue.shift();
+  if (socket_message) {
+    console.log('notification_center.fire', socket_message)
+    notification_center.fire(socket_message);
+  }
+};
+
+setInterval(messageQueueConsoleLogger,100);
